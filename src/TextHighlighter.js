@@ -1,4 +1,13 @@
-(function (global) {
+(function (root, factory) {
+    if (typeof define === "function" && define.amd) {
+        define([], factory);
+    } else if (typeof exports === "object") {
+        module.exports = factory();
+    } else {
+        root.TextHighlighter = factory();
+    }
+}(this, function() {
+
     'use strict';
 
     var
@@ -412,6 +421,7 @@
      * @param {string} options.highlightedClass - class added to highlight, 'highlighted' by default.
      * @param {string} options.contextClass - class added to element to which highlighter is applied,
      *  'highlighter-context' by default.
+     * @param {boolean} options.bindEvents - enable / disable event processing.
      * @param {function} options.onRemoveHighlight - function called before highlight is removed. Highlight is
      *  passed as param. Function should return true if highlight should be removed, or false - to prevent removal.
      * @param {function} options.onBeforeHighlight - function called before highlight is created. Range object is
@@ -432,11 +442,13 @@
             contextClass: 'highlighter-context',
             onRemoveHighlight: function () { return true; },
             onBeforeHighlight: function () { return true; },
-            onAfterHighlight: function () { }
+            onAfterHighlight: function () { },
+            bindEvents: true
         });
 
         dom(this.el).addClass(this.options.contextClass);
-        bindEvents(this.el, this);
+
+        if(this.options.bindEvents) bindEvents(this.el, this);
     }
 
     /**
@@ -445,7 +457,7 @@
      * @memberof TextHighlighter
      */
     TextHighlighter.prototype.destroy = function () {
-        unbindEvents(this.el, this);
+        if(this.options.bindEvents) unbindEvents(this.el, this);
         dom(this.el).removeClass(this.options.contextClass);
     };
 
@@ -947,5 +959,6 @@
         return span;
     };
 
-    global.TextHighlighter = TextHighlighter;
-})(window);
+    return TextHighlighter;
+
+}));
